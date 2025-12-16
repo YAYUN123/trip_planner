@@ -27,7 +27,7 @@
 
 ### 环境要求
 
-- Python 3.8+
+- Python 3.12
 - 高德地图API密钥(获取指南：https://amap.apifox.cn/doc-537183)
 - LLM API密钥 (DeepSeek/OpenAI)
 
@@ -74,9 +74,9 @@ POST /trip
   "end_date": "2025-12-22",
   "travel_days": 3,
   "transportation": "公共交通",
-  "accommodation": "经济型酒店",
+  "accommodation": "经济型",
   "preferences": ["历史文化", "美食"],
-  "free_text_input": "希望安排轻松一些"
+  "free_text_input": ""
 }
 ```
 

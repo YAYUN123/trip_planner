@@ -1,6 +1,7 @@
 import json
 from datetime import date, timedelta
 from data_model import Attraction, Location, WeatherInfo, Hotel, Meal
+import ast
 
 
 def build_attraction(content: dict) -> Attraction:
@@ -10,11 +11,11 @@ def build_attraction(content: dict) -> Attraction:
         name=content["name"],
         address=content["address"],
         location=Location(longitude=float(lon_str), latitude=float(lat_str)),
-        opentime=content['opentime2'],  # 默认 60 分钟
-        description=f"{content['level']}级景区",  # 如无描述可留空
-        category=content["type"],  # 默认
+        opentime=content.get('opentime2', ''),  # 默认 60 分钟
+        description=content.get("level", ""),  # 如无描述可留空
+        category=content.get("type", ''),  # 默认
         rating=float(content.get("rating", 0)),
-        image_url=content.get("photo"),
+        image_url=content.get("photo", ""),
         ticket_price=ticket_price
     )
 
@@ -52,7 +53,7 @@ def parse_attraction_data(messages):
 
         if msg_type != "ToolMessage":
             continue
-        content = json.loads(content)
+        content = json.loads(content[0].get('text'))
         if content.get("location", ""):
             attractions.append(build_attraction(content))
     return attractions
@@ -96,6 +97,7 @@ def parse_weather_data(messages, start_date, end_date):
         # 提取消息内容
         content = getattr(msg, 'content', '')
         print(f"内容: {content if content else '<空>'}")
+
         """
         [{
             "date": "2025-12-15",
@@ -154,7 +156,7 @@ def parse_weather_data(messages, start_date, end_date):
 
         if msg_type != "ToolMessage":
             continue
-        content = json.loads(content)
+        content = json.loads(content[0].get('text'))
 
         for single_content in content["forecasts"]:
             if single_content.get("week", "") and single_content["date"] in dates:
@@ -167,7 +169,7 @@ def build_hotel(content):
         name=content["name"],
         address=content["address"],
         location=Location(longitude=float(lon_str), latitude=float(lat_str)),
-        rating=content["rating"],
+        rating=content.get("rating", "暂无评分"),
         type=content["type"],
         # 其余字段在原始数据中没有对应信息，保持默认值
     )
@@ -184,6 +186,7 @@ def parse_hotel_data(messages):
         # 提取消息内容
         content = getattr(msg, 'content', '')
         print(f"内容: {content if content else '<空>'}")
+
         """
             {
                 "id": "B000ABBX3R",
@@ -207,7 +210,7 @@ def parse_hotel_data(messages):
 
         if msg_type != "ToolMessage":
             continue
-        content = json.loads(content)
+        content = json.loads(content[0].get('text'))
         if content.get("location", ""):
             hotels.append(build_hotel(content))
     return hotels
@@ -235,6 +238,7 @@ def parse_meal_data(messages):
         # 提取消息内容
         content = getattr(msg, 'content', '')
         print(f"内容: {content if content else '<空>'}")
+
         """
             {
                 "id": "B0FFFTCGNX",
@@ -257,8 +261,7 @@ def parse_meal_data(messages):
         # 只处理 ToolMessage 类型
         if msg_type != "ToolMessage":
             continue
-
-        content = json.loads(content)
+        content = json.loads(content[0].get('text'))
 
         if content.get("meal_ordering", ""):
             meals.append(build_meal(content))

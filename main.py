@@ -3,7 +3,7 @@ from typing import Any, List, Union
 from fastapi import FastAPI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
-from langgraph.prebuilt import create_react_agent
+from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 import json
 from dotenv import load_dotenv
@@ -215,54 +215,54 @@ class MultiAgentTripPlanner:
                 "你是一个AI助手，使用高德地图工具获取信息。"
             ))
             print("  - 创建景点搜索Agent...")
-            self.attraction_agent = create_react_agent(
+            self.attraction_agent = create_agent(
                 name="景点搜索专家",
                 model=self.llm,
-                prompt=system_message,
+                system_prompt=system_message,
                 tools=tools
             )
 
             # 创建天气查询Agent
             print("  - 创建天气查询Agent...")
-            self.weather_agent = create_react_agent(
+            self.weather_agent = create_agent(
                 name="天气查询专家",
                 model=self.llm,
-                prompt=system_message,
+                system_prompt=system_message,
                 tools=tools
             )
 
             # 创建酒店推荐Agent
             print("  - 创建酒店推荐Agent...")
-            self.hotel_agent = create_react_agent(
+            self.hotel_agent = create_agent(
                 name="酒店推荐专家",
                 model=self.llm,
-                prompt=system_message,
+                system_prompt=system_message,
                 tools=tools
             )
 
             # 创建吃饭地方推荐Agent
             print("  - 创建美食推荐Agent...")
-            self.meal_agent = create_react_agent(
+            self.meal_agent = create_agent(
                 name="美食推荐专家",
                 model=self.llm,
-                prompt=system_message,
+                system_prompt=system_message,
                 tools=tools
             )
 
             # 创建行程规划Agent(不需要工具)
             print("  - 创建行程规划Agent...")
-            self.planner_agent = create_react_agent(
+            self.planner_agent = create_agent(
                 name="行程规划专家",
                 model=self.llm,
-                prompt=PLANNER_AGENT_SYSTEM_PROMPT,
+                system_prompt=PLANNER_AGENT_SYSTEM_PROMPT,
                 tools=[]
             )
 
             print("   - 创建精美旅行手册Agent...")
-            self.create_travel_guide_agent = create_react_agent(
+            self.create_travel_guide_agent = create_agent(
                 name="创建精美手册专家",
                 model=self.llm,
-                prompt="将下面这段json数据，使用html制作成网页，当做一个旅行助手的精美手册，只输出html代码，不要输出其他的内容。",
+                system_prompt="将下面这段json数据，使用html制作成网页，当做一个旅行助手的精美手册，只输出html代码，不要输出其他的内容。",
                 tools=[]
             )
 

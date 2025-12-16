@@ -28,14 +28,14 @@
 ### 环境要求
 
 - Python 3.8+
-- 高德地图API密钥
+- 高德地图API密钥(获取指南：https://amap.apifox.cn/doc-537183)
 - LLM API密钥 (DeepSeek/OpenAI)
 
 ### 安装步骤
 
 1. 克隆项目仓库：
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/YAYUN123/trip_planner.git
    cd trip_planner
    ```
 
@@ -50,11 +50,12 @@
    GAODE_API_KEY=your_amap_api_key
    LLM_API_KEY=your_llm_api_key
    LLM_MODEL_ID=your_preferred_model
+   LLM_BASE_URL=your_llm_base_url
    ```
 
 4. 运行应用：
    ```bash
-   python main2.py
+   uvicorn main:app --reload
    ```
 
 ### API接口

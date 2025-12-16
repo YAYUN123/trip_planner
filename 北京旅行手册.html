@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>北京冬日漫游手册 | 2025.12.15-12.17</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #d32f2f; /* 故宫红 */
+            --secondary-color: #1565c0; /* 天空蓝 */
+            --light-bg: #f9f9f9;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 导航条 */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), #b71c1c);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(183, 28, 28, 0.3);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: #ffd54f;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* 英雄区域 */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1592906209472-a36b1f3782ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            border-radius: 0 0 var(--radius) var(--radius);
+            margin-bottom: 40px;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .date-badge {
+            display: inline-block;
+            background-color: var(--primary-color);
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: var(--shadow);
+        }
+
+        /* 主要内容卡片 */
+        .card {
+            background-color: white;
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-title i {
+            font-size: 1.5rem;
+        }
+
+        /* 行程日 */
+        .day-plan {
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 25px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .day-plan:before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: var(--secondary-color);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            background-color: #e3f2fd;
+            padding: 15px 20px;
+            border-radius: 10px;
+        }
+
+        .day-title {
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+        }
+
+        .day-date {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .day-description {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            color: var(--text-dark);
+        }
+
+        /* 信息网格 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .info-box {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .info-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 景点和餐饮 */
+        .attraction-item,
+        .meal-item {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .attraction-name,
+        .meal-type {
+            color: var(--secondary-color);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detail-row {
+            display: flex;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            min-width: 100px;
+            color: var(--text-light);
+        }
+
+        /* 天气 */
+        .weather-cards {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .weather-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 25px;
+            border-radius: var(--radius);
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .weather-date {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--secondary-color);
+        }
+
+        .weather-temp {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 10px 0;
+        }
+
+        /* 预算 */
+        .budget-breakdown {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            text-align: center;
+        }
+
+        .budget-item {
+            padding: 20px;
+            background-color: #f1f8e9;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .budget-amount {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #388e3c;
+            margin: 10px 0;
+        }
+
+        .budget-total {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary-color);
+            font-weight: 800;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed var(--border-color);
+        }
+
+        /* 建议列表 */
+        .suggestions-list {
+            list-style: none;
+        }
+
+        .suggestions-list li {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff8e1;
+            border-radius: 10px;
+            border-left: 4px solid #ffb300;
+        }
+
+        /* 页脚 */
+        footer {
+            background-color: #263238;
+            color: #eceff1;
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 50px;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #ffd54f;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: var(--primary-color);
+                flex-direction: column;
+                padding: 20px;
+                text-align: center;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航条 -->
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <i class="fas fa-map-marked-alt"></i>
+                <span>旅行助手手册</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#overview" class="active"><i class="fas fa-home"></i> 行程概览</a></li>
+                <li><a href="#itinerary"><i class="fas fa-calendar-alt"></i> 每日行程</a></li>
+                <li><a href="#weather"><i class="fas fa-cloud-sun"></i> 天气</a></li>
+                <li><a href="#budget"><i class="fas fa-calculator"></i> 预算</a></li>
+                <li><a href="#tips"><i class="fas fa-lightbulb"></i> 旅行建议</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <div class="container">
+            <h1>北京冬日漫游</h1>
+            <p class="subtitle">穿越六百年紫禁城，漫步皇家园林，登临万里长城</p>
+            <div class="date-badge">
+                <i class="far fa-calendar-alt"></i> 2025年12月15日 - 12月17日 | 3天2晚
+            </div>
+        </div>
+    </section>
+
+    <main class="container">
+        <!-- 行程概览 -->
+        <section id="overview" class="card">
+            <h2 class="card-title"><i class="fas fa-route"></i> 行程概览</h2>
+            <p>本次行程将带您领略北京作为历史古都的庄严与壮美。从明清皇家宫殿到世界文化遗产，从皇家园林到万里长城，在冬日清冽的空气中，感受中华文明的深厚底蕴。</p>
+            <div class="info-grid" style="margin-top: 30px;">
+                <div class="info-box">
+                    <h4><i class="fas fa-hotel"></i> 住宿</h4>
+                    <p><strong>汉庭酒店(北京天安门店)</strong></p>
+                    <p>南池子大街102号，地理位置优越，靠近天安门广场与故宫，交通便利。</p>
+                    <p><em>价格区间：300-450元/晚 | 评分：4.6</em></p>
+                </div>
+                <div class="info-box">
+                    <h4><i class="fas fa-subway"></i> 主要交通</h4>
+                    <p>全程建议使用<strong>公共交通</strong>（地铁、公交）。</p>
+                    <p>推荐使用“亿通行”APP或北京一卡通，便捷实惠。</p>
+                    <p>前往八达岭长城可乘坐市郊铁路S2线或德胜门公交877路。</p>
+                </div>
+                <div class="info-box">
+                    <h4><i class="fas fa-suitcase-rolling"></i> 行程特点</h4>
+                    <ul style="padding-left: 20px;">
+                        <li>深度游览世界文化遗产</li>
+                        <li>体验皇家建筑与园林艺术</li>
+                        <li>品尝地道北京美食</li>
+                        <li>冬日长城独特风光</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 每日行程 -->
+        <section id="itinerary" class="card">
+            <h2 class="card-title"><i class="fas fa-calendar-day"></i> 每日详细行程</h2>
+
+            <!-- 第一天 -->
+            <div class="day-plan">
+                <div class="day-header">
+                    <h3 class="day-title">第一天 · 皇城初印象</h3>
+                    <div class="day-date">2025年12月15日（星期一）</div>
+                </div>
+                <p class="day-description">抵达北京，游览故宫博物院和天坛公园，感受明清皇家建筑与祭祀文化的庄严与宏伟。</p>
+                <div class="detail-row"><span class="detail-label">交通：</span>公共交通（地铁、公交）</div>
+                <div class="detail-row"><span class="detail-label">住宿：</span>汉庭酒店(北京天安门店)</div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-landmark"></i> 景点安排</h4>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-university"></i> 故宫博物院</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>景山前街4号</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>周二至周日 08:30-16:30 (最晚进入15:30)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，明清两代的皇家宫殿，世界上现存规模最大、保存最为完整的木质结构古建筑群之一。</div>
+                </div>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-tree"></i> 天坛公园</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>天坛东里甲1号</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>06:30-22:00 (21:00停止入园)；园中园:08:00-17:00(16:30停止入园)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，明清两代皇帝“祭天”“祈谷”的场所，以严谨的建筑布局、奇特的建筑构造著称。</div>
+                </div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-utensils"></i> 餐饮安排</h4>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-coffee"></i> 早餐</div>
+                    <p><strong>酒店早餐或附近小吃店</strong> - 可在酒店享用早餐，或前往附近胡同品尝北京特色早点如豆汁、焦圈、炒肝。 (预计: 25元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-sun"></i> 午餐</div>
+                    <p><strong>故宫附近餐厅</strong> - 游览故宫后，可在东华门或王府井附近选择一家京味餐厅，品尝炸酱面、京酱肉丝等。 (预计: 60元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-moon"></i> 晚餐</div>
+                    <p><strong>前门大街美食</strong> - 晚上前往前门大街，这里汇聚了全聚德、东来顺等老字号以及各种北京小吃，可选择烤鸭或涮羊肉。 (预计: 100元)</p>
+                </div>
+            </div>
+
+            <!-- 第二天 -->
+            <div class="day-plan">
+                <div class="day-header">
+                    <h3 class="day-title">第二天 · 园林与遗迹</h3>
+                    <div class="day-date">2025年12月16日（星期二）</div>
+                </div>
+                <p class="day-description">游览颐和园和圆明园遗址公园，领略皇家园林的秀美与历史遗迹的沧桑。天气多云转晴，注意防风保暖。</p>
+                <div class="detail-row"><span class="detail-label">交通：</span>公共交通（地铁4号线）</div>
+                <div class="detail-row"><span class="detail-label">住宿：</span>汉庭酒店(北京天安门店)</div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-landmark"></i> 景点安排</h4>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-water"></i> 颐和园</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>新建宫门路19号</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>06:30-19:00 (18:00停止进入)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，中国现存规模最大、保存最完整的皇家园林，以昆明湖、万寿山为基址。</div>
+                </div>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-history"></i> 圆明园遗址公园</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>清华西路28号</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>6:30-19:30 (17:30停止售票、停止入园)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，曾是一座大型皇家宫苑，有“万园之园”之称。现为重要的爱国主义教育基地。</div>
+                </div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-utensils"></i> 餐饮安排</h4>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-coffee"></i> 早餐</div>
+                    <p><strong>酒店早餐</strong> - 在酒店享用早餐，为一天的行程储备能量。 (预计: 25元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-sun"></i> 午餐</div>
+                    <p><strong>颐和园附近简餐</strong> - 游览颐和园后，可在园外或地铁西苑站附近解决午餐，选择面馆或快餐。 (预计: 50元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-moon"></i> 晚餐</div>
+                    <p><strong>返回市区用餐</strong> - 返回市区后，可在酒店附近或王府井商圈选择餐厅，品尝北京家常菜。 (预计: 80元)</p>
+                </div>
+            </div>
+
+            <!-- 第三天 -->
+            <div class="day-plan">
+                <div class="day-header">
+                    <h3 class="day-title">第三天 · 王府与长城</h3>
+                    <div class="day-date">2025年12月17日（星期三）</div>
+                </div>
+                <p class="day-description">游览恭王府博物馆，下午前往八达岭长城，体验“不到长城非好汉”的豪情。天气晴好，但气温低，需做好防寒措施。</p>
+                <div class="detail-row"><span class="detail-label">交通：</span>公共交通（地铁+市郊铁路S2线或公交877路）</div>
+                <div class="detail-row"><span class="detail-label">住宿：</span>经济型酒店（仅上午存放行李）</div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-landmark"></i> 景点安排</h4>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-landmark"></i> 恭王府博物馆</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>前海西街17号</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>周二至周日08:30-17:00(16:10停止检票)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，清代规模最大的一座王府，曾先后作为和珅、永璘的宅邸。</div>
+                </div>
+                <div class="attraction-item">
+                    <div class="attraction-name"><i class="fas fa-mountain"></i> 八达岭长城</div>
+                    <div class="detail-row"><span class="detail-label">地址：</span>G6京藏高速58号出口</div>
+                    <div class="detail-row"><span class="detail-label">开放时间：</span>07:30-16:00(停售停检)</div>
+                    <div class="detail-row"><span class="detail-label">描述：</span>AAAAA级景区，明长城中保存最好、最具代表性的一段，地势险要，是万里长城的精华。</div>
+                </div>
+
+                <h4 style="color: var(--primary-color); margin: 25px 0 15px 0;"><i class="fas fa-utensils"></i> 餐饮安排</h4>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-coffee"></i> 早餐</div>
+                    <p><strong>酒店早餐</strong> - 在酒店享用早餐，退房并寄存行李。 (预计: 25元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-sun"></i> 午餐</div>
+                    <p><strong>恭王府附近或前往长城途中</strong> - 游览恭王府后，可在什刹海附近简单用餐，或携带干粮在前往长城的路上解决。 (预计: 40元)</p>
+                </div>
+                <div class="meal-item">
+                    <div class="meal-type"><i class="fas fa-moon"></i> 晚餐</div>
+                    <p><strong>返回市区或机场/火车站附近</strong> - 从长城返回后，根据返程时间，在市区或交通枢纽附近用餐。 (预计: 70元)</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 天气信息 -->
+        <section id="weather" class="card">
+            <h2 class="card-title"><i class="fas fa-cloud-sun-rain"></i> 天气预告</h2>
+            <p style="margin-bottom: 25px;">12月的北京寒冷干燥，昼夜温差大，请务必做好防寒保暖措施。</p>
+            <div class="weather-cards">
+                <div class="weather-card">
+                    <div class="weather-date">12月15日</div>
+                    <div><i class="fas fa-sun" style="color: #ff9800; font-size: 2rem;"></i></div>
+                    <div class="weather-temp">4°C / -5°C</div>
+                    <div>白天：晴 | 夜间：多云</div>
+                    <div>北风 1-3级</div>
+                </div>
+                <div class="weather-card">
+                    <div class="weather-date">12月16日</div>
+                    <div><i class="fas fa-cloud-sun" style="color: #607d8b; font-size: 2rem;"></i></div>
+                    <div class="weather-temp">5°C / -6°C</div>
+                    <div>白天：多云 | 夜间：晴</div>
+                    <div>东北风 1-3级</div>
+                </div>
+                <div class="weather-card">
+                    <div class="weather-date">12月17日</div>
+                    <div><i class="fas fa-sun" style="color: #ff9800; font-size: 2rem;"></i></div>
+                    <div class="weather-temp">6°C / -4°C</div>
+                    <div>白天：晴 | 夜间：多云</div>
+                    <div>西南风 1-3级</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 预算 -->
+        <section id="budget" class="card">
+            <h2 class="card-title"><i class="fas fa-wallet"></i> 预算估算（人均）</h2>
+            <p style="margin-bottom: 25px;">以下为基于提供信息的粗略估算，实际花费可能因个人选择而异。</p>
+            <div class="budget-breakdown">
+                <div class="budget-item">
+                    <div><i class="fas fa-ticket-alt" style="color: #3f51b5; font-size: 2rem;"></i></div>
+                    <div>景点门票</div>
+                    <div class="budget-amount">0 元</div>
+                    <div><small>（需提前预约）</small></div>
+                </div>
+                <div class="budget-item">
+                    <div><i class="fas fa-hotel" style="color: #009688; font-size: 2rem;"></i></div>
+                    <div>住宿 (2晚)</div>
+                    <div class="budget-amount">1125 元</div>
+                    <div><small>（375元/晚）</small></div>
+                </div>
+                <div class="budget-item">
+                    <div><i class="fas fa-utensils" style="color: #ff5722; font-size: 2rem;"></i></div>
+                    <div>餐饮</div>
+                    <div class="budget-amount">475 元</div>
+                </div>
+                <div class="budget-item">
+                    <div><i class="fas fa-bus" style="color: #9c27b0; font-size: 2rem;"></i></div>
+                    <div>交通</div>
+                    <div class="budget-amount">150 元</div>
+                </div>
+            </div>
+            <div class="budget-total">
+                总计预估：<span style="color: #d32f2f;">1750 元</span>
+            </div>
+        </section>
+
+        <!-- 旅行建议 -->
+        <section id="tips" class="card">
+            <h2 class="card-title"><i class="fas fa-lightbulb"></i> 重要旅行建议</h2>
+            <ul class="suggestions-list">
+                <li><strong>保暖防寒：</strong> 12月的北京寒冷干燥，白天最高气温仅个位数，夜间降至零下，务必穿戴羽绒服、帽子、围巾、手套，注意防风保暖。</li>
+                <li><strong>门票预约：</strong> 所有景点门票均为0元（可能为淡季免费或信息如此），但仍需提前在官方平台（如“畅游公园”公众号）实名预约，故宫、恭王府等热门场馆尤其需要尽早预约。</li>
+                <li><strong>长城行程：</strong> 第三天八达岭长城行程较远，单程公共交通约需1.5-2小时，请务必早起，并预留充足返程时间。可考虑乘坐市郊铁路S2线（“开往春天的列车”）或德胜门公交877路。</li>
+                <li><strong>交通出行：</strong> 使用“亿通行”APP或北京一卡通乘坐地铁公交非常方便。</li>
+                <li><strong>舒适着装：</strong> 行程中步行较多，请穿着舒适保暖的鞋子。</li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-logo">
+                <i class="fas fa-compass"></i> 旅行助手手册
+            </div>
+            <p>为您提供贴心、详尽、实用的旅行规划指南</p>
+            <p style="margin-top: 20px; color: #b0bec5; font-size: 0.9rem;">行程信息仅供参考，请以实际情况为准。祝您旅途愉快！</p>
+        </div>
+    </footer>
+
+    <script>
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    // 关闭移动端菜单
+                    navLinks.classList.remove('active');
+
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 高亮当前活动导航链接
+        window.addEventListener('scroll', () => {
+            const sections = document.querySelectorAll('section[id]');
+            const navLinks = document.querySelectorAll('.nav-links a');
+
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if(scrollY >= (sectionTop - 100)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

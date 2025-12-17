@@ -45,12 +45,15 @@
    ```
 
 3. 配置环境变量：
+   ```bash
+   cp .env_example .env
+   ```
    在 `.env` 文件中配置以下API密钥：
    ```
-   GAODE_API_KEY=your_amap_api_key
-   LLM_API_KEY=your_llm_api_key
-   LLM_MODEL_ID=your_preferred_model
-   LLM_BASE_URL=your_llm_base_url
+   GAODE_API_KEY="your_amap_api_key"
+   LLM_API_KEY="your_llm_api_key"
+   LLM_MODEL_ID="your_preferred_model"
+   LLM_BASE_URL="your_llm_base_url"
    ```
 
 4. 运行应用：

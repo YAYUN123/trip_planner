@@ -10,116 +10,10 @@ from dotenv import load_dotenv
 from playwright.async_api import async_playwright, Playwright
 from data_model import *
 from parse_info import parse_attraction_data, parse_weather_data, parse_hotel_data, parse_meal_data
-import math
-
-
-def haversine_distance(location1, location2):
-    """
-    计算两个经纬度点之间的距离（单位：米）
-    """
-    lat1, lon1 = location1.split(",")
-    lat2, lon2 = location2.split(",")
-
-    # 将经纬度转换为弧度
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-
-    # 计算差值
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-
-    # Haversine公式
-    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
-    c = 2 * math.asin(math.sqrt(a))
-
-    # 地球半径（平均半径，单位：米）
-    earth_radius = 6371000
-
-    # 计算距离
-    distance = earth_radius * c
-
-    return distance
-
+from prompts import PLANNER_AGENT_SYSTEM_PROMPT
+from cluster import greedy_cluster
 
 load_dotenv()
-
-PLANNER_AGENT_SYSTEM_PROMPT = """你是行程规划专家。你的任务是根据景点信息和天气信息,生成详细的旅行计划。
-
-请严格按照以下JSON格式返回旅行计划:
-```json
-{
-  "city": "城市名称",
-  "start_date": "YYYY-MM-DD",
-  "end_date": "YYYY-MM-DD",
-  "days": [
-    {
-      "date": "YYYY-MM-DD",
-      "day_index": 0,
-      "description": "第1天行程概述",
-      "transportation": "交通方式",
-      "accommodation": "住宿类型",
-      "hotel": {
-        "name": "酒店名称",
-        "address": "酒店地址",
-        "location": {"longitude": 116.397128, "latitude": 39.916527},
-        "price_range": "300-500元",
-        "rating": "4.5",
-        "distance": "距离景点2公里",
-        "type": "经济型酒店",
-        "estimated_cost": 400
-      },
-      "attractions": [
-        {
-          "name": "景点名称",
-          "address": "详细地址",
-          "location": {"longitude": 116.397128, "latitude": 39.916527},
-          "opentime": "景点的开放时间",
-          "description": "景点详细描述",
-          "category": "景点类别",
-          "ticket_price": 60
-        }
-      ],
-      "meals": [
-        {"type": "breakfast", "name": "早餐推荐", "description": "早餐描述", "estimated_cost": 30},
-        {"type": "lunch", "name": "午餐推荐", "description": "午餐描述", "estimated_cost": 50},
-        {"type": "dinner", "name": "晚餐推荐", "description": "晚餐描述", "estimated_cost": 80}
-      ]
-    }
-  ],
-  "weather_info": [
-    {
-      "date": "YYYY-MM-DD",
-      "day_weather": "晴",
-      "night_weather": "多云",
-      "day_temp": 25,
-      "night_temp": 15,
-      "wind_direction": "南风",
-      "wind_power": "1-3级"
-    }
-  ],
-  "overall_suggestions": "总体建议",
-  "budget": {
-    "total_attractions": 180,
-    "total_hotels": 1200,
-    "total_meals": 480,
-    "total_transportation": 200,
-    "total": 2060
-  }
-}
-```
-
-**重要提示:**
-1. weather_info数组必须包含每一天的天气信息
-2. 温度必须是纯数字(不要带°C等单位)
-3. 每天安排2-3个景点
-4. 考虑景点之间的距离和游览时间
-5. 每天必须包含早中晚三餐
-6. 提供实用的旅行建议
-7. **必须包含预算信息**:
-   - 景点门票价格(ticket_price)
-   - 餐饮预估费用(estimated_cost)
-   - 酒店预估费用(estimated_cost)
-   - 预算汇总(budget)包含各项总费用
-"""
 
 def parse_messages(messages: List[Any]) -> None:
     """
@@ -205,7 +99,7 @@ class MultiAgentTripPlanner:
             self.llm = init_chat_model(
                 model=os.getenv("LLM_MODEL_ID"),
                 api_key=os.getenv("LLM_API_KEY"),
-                base_url="https://api.deepseek.com/v1",
+                base_url=os.getenv("LLM_BASE_URL"),
                 temperature=0,
                 max_tokens=8000
             )
@@ -306,7 +200,8 @@ class MultiAgentTripPlanner:
             # attraction_response = attraction_response_messages[1].content
             parse_messages(attraction_response_messages)
             attraction_response = parse_attraction_data(attraction_response_messages)
-            print(f"景点搜索结果: {attraction_response}\n")
+            for single_attraction in attraction_response:
+                print(f"景点搜索结果: {single_attraction}\n")
             assert attraction_response != [], f"景点搜索结果:[]，没有搜索到景点结果"
 
             # 步骤2: 天气查询Agent查询天气
@@ -317,27 +212,43 @@ class MultiAgentTripPlanner:
             weather_response_messages = weather_response["messages"]
             # weather_response = weather_response["messages"][1].content
             weather_response = parse_weather_data(weather_response_messages, request.start_date, request.end_date)
-            print(f"天气查询结果: {weather_response}...\n")
+            for single_weather in weather_response:
+                print(f"天气查询结果: {single_weather}\n")
             # parse_messages(weather_response_messages)
             assert weather_response != [], f"天气搜索结果:[]，没有搜索到天气结果"
 
             # 步骤3: 酒店推荐Agent搜索酒店
             print("🏨 步骤3: 搜索酒店...")
-            first_attraction_name = attraction_response[0].name
-            first_attraction_location = attraction_response[0].location
-            hotel_query = f"请搜索{request.city}的{first_attraction_name}周围1公里的{request.accommodation}酒店，然后挑选已经搜索出来的{request.travel_days-1}个酒店的详情信息"
-            hotel_response = await self.hotel_agent.ainvoke(
-                {"messages": [{'role': 'user', 'content': hotel_query}]})
-            hotel_response_messages = hotel_response["messages"]
-            # hotel_response = hotel_response["messages"][1].content
-            hotel_response = parse_hotel_data(hotel_response_messages)
+            # 根据景点经纬度，寻找附近的酒店
+            locations2name = dict()
+            attraction_locations = []
+            for single_attraction in attraction_response:
+                location = single_attraction.location
+                attraction_locations.append([location.longitude, location.latitude])
 
-            # hotel_id2location = {hotel["id"]: hotel["location"] for hotel in hotel_response}
-            # distances = {hotel["id"]: haversine_distance(hotel["location"], first_attraction_location)
-            #              for hotel in hotel_response}
-            # min_distance_hotel_id = min(distances, key=distances.get)
+                location = ','.join([str(location.longitude), str(location.latitude)])
+                locations2name[location] = single_attraction.name
+            clusters = greedy_cluster(attraction_locations)
 
-            print(f"酒店搜索结果: {hotel_response}...\n")
+            # 中心景点
+            central_attraction_names = []
+            for cluster in clusters:
+                longitude, latitude = attraction_locations[cluster[0]]
+                location = ','.join([str(longitude), str(latitude)])
+                central_attraction_names.append(locations2name[location])
+
+            hotel_response = []
+            for central_attraction_name in central_attraction_names:
+                hotel_query = self._build_hotel_query(request, central_attraction_name)
+                single_hotel_response = await self.hotel_agent.ainvoke(
+                    {"messages": [{'role': 'user', 'content': hotel_query}]})
+                single_hotel_response_messages = single_hotel_response["messages"]
+                # single_hotel_response = single_hotel_response["messages"][1].content
+                single_hotel_response = parse_hotel_data(single_hotel_response_messages,
+                                                         central_attraction_name,
+                                                         request.accommodation)[0]
+                print(f"酒店搜索结果: {single_hotel_response}\n")
+                hotel_response.append(single_hotel_response)
             # parse_messages(hotel_response_messages)
             assert hotel_response != [], f"酒店搜索结果:[]，没有搜索到酒店结果"
 
@@ -455,8 +366,13 @@ class MultiAgentTripPlanner:
 
         # 直接返回工具调用格式
         # query = f"帮我搜索{request.city}的{keywords}相关景点"
-        query = f"帮我搜一下{request.city}的{keywords}相关景点，然后挑选已经搜索出来的6个景点的详情信息"
+        query = f"帮我搜一下{request.city}的{keywords}相关景点，然后挑选已经搜索出来的{request.travel_days*3}个景点的详情信息"
         return query
+
+    @staticmethod
+    def _build_hotel_query(request, central_attraction_name):
+        return f"请搜索{request.city}的{central_attraction_name}周围1公里的{request.accommodation}酒店，然后挑选已经搜索出来的1个酒店的详情信息"
+
 
     @staticmethod
     def _build_planner_query(request, attraction_response, weather_response, hotel_response):
@@ -482,6 +398,9 @@ class MultiAgentTripPlanner:
 
 请生成详细的旅行计划,包括每天的景点安排、餐饮推荐、住宿信息和预算明细。
 """
+        if request.free_text_input:
+            query += f"\n**额外要求:** {request.free_text_input}"
+
         return query
 
     def _parse_response2(self, response: str, data_type: str, request: TripRequest) -> Union[TripPlan, str]:

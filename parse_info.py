@@ -163,7 +163,12 @@ def parse_weather_data(messages, start_date, end_date):
                 weathers.append(build_weather(single_content))
     return weathers
 
-def build_hotel(content):
+
+def build_hotel(content, central_attraction_name, accommodation):
+    hotel_price_config = {"经济型": {"price_range": "200以内", "estimated_cost": 160},
+                          "舒适型": {"price_range": "200-400", "estimated_cost": 300},
+                          "豪华型": {"price_range": "400-1000", "estimated_cost": 600}}
+
     lon_str, lat_str = content["location"].split(",")
     return Hotel(
         name=content["name"],
@@ -171,11 +176,13 @@ def build_hotel(content):
         location=Location(longitude=float(lon_str), latitude=float(lat_str)),
         rating=content.get("rating", "暂无评分"),
         type=content["type"],
-        # 其余字段在原始数据中没有对应信息，保持默认值
+        description=content.get("description", f"距离{central_attraction_name}景点 1 公里内"),
+        price_range=hotel_price_config[accommodation]["price_range"],
+        estimated_cost=hotel_price_config[accommodation]["estimated_cost"],
     )
 
 
-def parse_hotel_data(messages):
+def parse_hotel_data(messages, central_attraction_name, accommodation):
     hotels = []
 
     print("=== 消息解析结果 ===")
@@ -212,7 +219,7 @@ def parse_hotel_data(messages):
             continue
         content = json.loads(content[0].get('text'))
         if content.get("location", ""):
-            hotels.append(build_hotel(content))
+            hotels.append(build_hotel(content, central_attraction_name, accommodation))
     return hotels
 
 def build_meal(content):

@@ -100,7 +100,9 @@ async def run_agent():
         tools=tools
     )
 
-    response = await agent.ainvoke({"messages": [{"role": "user", "content": "帮我查一下北京的景点"}]})
+    # response = await agent.ainvoke({"messages": [{"role": "user", "content": "帮我查一下北京的景点"}]})
+    response = await agent.ainvoke({"messages": [{"role": "user", "content": "请搜索北京的故宫博物院周围1公里的经济型酒店，然后挑选已经搜索出来的1个酒店的详情信息"}]})
+
     parse_messages(response["messages"])
 
 if __name__ == "__main__":

@@ -1,10 +1,12 @@
 import os
+from datetime import datetime
 from typing import Any, List, Union
 from fastapi import FastAPI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
+from langchain_openai import ChatOpenAI
 import json
 from dotenv import load_dotenv
 from playwright.async_api import async_playwright, Playwright
@@ -133,37 +135,33 @@ class MultiAgentTripPlanner:
             print(f"偏好: {', '.join(request.preferences) if request.preferences else '无'}")
             print(f"{'='*60}\n")
 
+            retry_number = 2
+            count = 0
+
             # 步骤1: 景点搜索Agent搜索景点
             print("📍 步骤1: 搜索景点...")
-            attraction_query = self._build_attraction_query(request)
-            attraction_response = await self.attraction_agent.ainvoke(
-                input={"messages": [HumanMessage(content=attraction_query)]},
-                # stream_mode="values"
-            )
-            attraction_response_messages = attraction_response['messages']
-            # attraction_response = attraction_response_messages[1].content
-            parse_messages(attraction_response_messages)
-            attraction_response = parse_attraction_data(attraction_response_messages)
-            for single_attraction in attraction_response:
-                print(f"景点搜索结果: {single_attraction}\n")
+            attraction_response = []
+            for i in range(retry_number):
+                attraction_response = await self._get_attraction_response(request)
+                if attraction_response:
+                    print(f"搜索景点在第{i}次成功。。。。。。。。。。。。。。。")
+                    break
             assert attraction_response != [], f"景点搜索结果:[]，没有搜索到景点结果"
 
             # 步骤2: 天气查询Agent查询天气
             print("🌤️  步骤2: 查询天气...")
-            weather_query = f"帮我查询{request.city}的天气信息"
-            weather_response = await self.weather_agent.ainvoke(
-                {"messages": [{'role': 'user', 'content': weather_query}]})
-            weather_response_messages = weather_response["messages"]
-            # weather_response = weather_response["messages"][1].content
-            weather_response = parse_weather_data(weather_response_messages, request.start_date, request.end_date)
-            for single_weather in weather_response:
-                print(f"天气查询结果: {single_weather}\n")
-            # parse_messages(weather_response_messages)
+            weather_response = []
+            for i in range(retry_number):
+                weather_response = await self._get_weather_response(request)
+                if weather_response:
+                    print(f"查询天气在第{i}次成功。。。。。。。。。。。。。。。")
+                    break
             assert weather_response != [], f"天气搜索结果:[]，没有搜索到天气结果"
 
             # 步骤3: 酒店推荐Agent搜索酒店
             print("🏨 步骤3: 搜索酒店...")
             # 根据景点经纬度，寻找附近的酒店
+            # 对景点进行距离划分，随机选取一个景点，再和离该景点最近的两个组成一组
             locations2name = dict()
             attraction_locations = []
             for single_attraction in attraction_response:
@@ -182,18 +180,11 @@ class MultiAgentTripPlanner:
                 central_attraction_names.append(locations2name[location])
 
             hotel_response = []
-            for central_attraction_name in central_attraction_names:
-                hotel_query = self._build_hotel_query(request, central_attraction_name)
-                single_hotel_response = await self.hotel_agent.ainvoke(
-                    {"messages": [{'role': 'user', 'content': hotel_query}]})
-                single_hotel_response_messages = single_hotel_response["messages"]
-                # single_hotel_response = single_hotel_response["messages"][1].content
-                single_hotel_response = parse_hotel_data(single_hotel_response_messages,
-                                                         central_attraction_name,
-                                                         request.accommodation)[0]
-                print(f"酒店搜索结果: {single_hotel_response}\n")
-                hotel_response.append(single_hotel_response)
-            # parse_messages(hotel_response_messages)
+            for i in range(retry_number):
+                hotel_response = await self._get_hotel_response(request, central_attraction_names)
+                if hotel_response:
+                    print(f"搜索酒店在第{i}次成功。。。。。。。。。。。。。。。")
+                    break
             assert hotel_response != [], f"酒店搜索结果:[]，没有搜索到酒店结果"
 
             # # 步骤4: 美食推荐Agent搜索美食
@@ -207,30 +198,13 @@ class MultiAgentTripPlanner:
 
             # 步骤5: 行程规划Agent整合信息生成计划
             print("📋 步骤5: 生成行程计划...")
-            planner_query = self._build_planner_query(request,
-                                                      attraction_response,
-                                                      weather_response,
-                                                      hotel_response,
-                                                      )
-            print(f"{'=' * 60}")
-            print(f"✅ 汇总信息: {planner_query}\n")
-            print(f"{'=' * 60}\n")
-            planner_response = self.planner_agent.invoke(
-                {"messages":[{'role': 'user', 'content': planner_query}]})
-            planner_response = planner_response["messages"][1].content
-            print(f"行程规划结果: {planner_response}...\n")
+            trip_plan = self._build_trip_plan(request, attraction_response, weather_response, hotel_response)
 
             # 解析最终计划
             print("📲 步骤6: 生成html代码...")
-            trip_plan = self._parse_response(planner_response, "```json", request)
-            travel_guider_query = f"数据内容:\n{trip_plan}"
-            travel_guider_response = self.create_travel_guide_agent.invoke(
-                {"messages": [{'role': 'user', 'content': travel_guider_query}]})
-            html_content = travel_guider_response["messages"][-1].content
-            print(f"html_content: {html_content}\n")
-            html_code = self._parse_response(html_content, "```html", request)
+            html_code = self._build_html_code(f"```json\n{trip_plan}\n```", request)
             output_file_name = f"{request.city}旅行手册.html"
-            self._create_html(html_code, output_file_name)
+            self._write_html(html_code, output_file_name)
 
             print("✅ 步骤7: 制作精美手册...")
             async with async_playwright() as p:
@@ -313,10 +287,50 @@ class MultiAgentTripPlanner:
         query = f"帮我搜一下{request.city}的{keywords}相关景点，然后挑选已经搜索出来的{request.travel_days*3}个景点的详情信息"
         return query
 
+    async def _get_attraction_response(self, request: TripRequest):
+        attraction_query = self._build_attraction_query(request)
+        attraction_response = await self.attraction_agent.ainvoke(
+            input={"messages": [{'role': 'user', 'content': attraction_query}]},
+            # stream_mode="values"
+        )
+        attraction_response_messages = attraction_response['messages']
+        # attraction_response = attraction_response_messages[1].content
+        # parse_messages(attraction_response_messages)
+        attraction_response = parse_attraction_data(attraction_response_messages)
+        for single_attraction in attraction_response:
+            print(f"景点搜索结果: {single_attraction}\n")
+        return attraction_response
+
+    async def _get_weather_response(self, request: TripRequest):
+        weather_query = f"帮我查询{request.city}的天气信息"
+        weather_response = await self.weather_agent.ainvoke(
+            {"messages": [{'role': 'user', 'content': weather_query}]})
+        weather_response_messages = weather_response["messages"]
+        # weather_response = weather_response["messages"][1].content
+        weather_response = parse_weather_data(weather_response_messages, request.start_date, request.end_date)
+        for single_weather in weather_response:
+            print(f"天气查询结果: {single_weather}\n")
+        # parse_messages(weather_response_messages)
+        return weather_response
+
     @staticmethod
     def _build_hotel_query(request, central_attraction_name):
         return f"请搜索{request.city}的{central_attraction_name}周围1公里的{request.accommodation}酒店，然后挑选已经搜索出来的1个酒店的详情信息"
 
+    async def _get_hotel_response(self, request: TripRequest, central_attraction_names):
+        hotel_response = []
+        for central_attraction_name in central_attraction_names:
+            hotel_query = self._build_hotel_query(request, central_attraction_name)
+            single_hotel_response = await self.hotel_agent.ainvoke(
+                {"messages": [{'role': 'user', 'content': hotel_query}]})
+            single_hotel_response_messages = single_hotel_response["messages"]
+            # single_hotel_response = single_hotel_response["messages"][1].content
+            single_hotel_response = parse_hotel_data(single_hotel_response_messages,
+                                                     central_attraction_name,
+                                                     request.accommodation)[0]
+            print(f"酒店搜索结果: {single_hotel_response}\n")
+            hotel_response.append(single_hotel_response)
+        return hotel_response
 
     @staticmethod
     def _build_planner_query(request, attraction_response, weather_response, hotel_response):
@@ -465,7 +479,47 @@ class MultiAgentTripPlanner:
             print(f"⚠️  解析响应失败: {str(e)}")
             raise ValueError(f"解析响应时发生错误: {str(e)}")
 
-    def _create_html(self, html_code, output_file_name):
+    def _build_trip_plan(self, request, attraction_response, weather_response, hotel_response) -> str:
+        planner_query = self._build_planner_query(request,
+                                                  attraction_response,
+                                                  weather_response,
+                                                  hotel_response,
+                                                  )
+        print(f"{'=' * 60}")
+        print(f"✅ 汇总信息: {planner_query}\n")
+        print(f"{'=' * 60}\n")
+        planner_response = self.planner_agent.invoke(
+            {"messages": [{'role': 'user', 'content': planner_query}]})
+        planner_response = planner_response["messages"][1].content
+        try:
+            trip_plan = self._parse_response(planner_response, "```json", request)
+        except ValueError as e:
+            print(f"重新生成旅行规划 json 数据。。。。。。。。。。。。。。。。。。。。。。。。。。。。")
+            planner_response = self.planner_agent.invoke(
+                {"messages": [{'role': 'user', 'content': planner_query}]})
+            planner_response = planner_response["messages"][1].content
+            trip_plan = self._parse_response(planner_response, "```json", request)
+        print(f"行程规划结果: {planner_response}...\n")
+        return trip_plan
+
+    def _build_html_code(self, trip_plan, request) -> str:
+        travel_guider_query = f"数据内容:\n{trip_plan}"
+        travel_guider_response = self.create_travel_guide_agent.invoke(
+            {"messages": [{'role': 'user', 'content': travel_guider_query}]})
+        html_content = travel_guider_response["messages"][-1].content
+        print(f"html_content: {html_content}\n")
+        try:
+            html_code = self._parse_response(html_content, "```html", request)
+        except ValueError as e:
+            print("重新生成手册的 html 代码。。。。。。。。。。。。。。。。。。。。。。。。。。。。。")
+            travel_guider_response = self.create_travel_guide_agent.invoke(
+                {"messages": [{'role': 'user', 'content': travel_guider_query}]})
+            html_content = travel_guider_response["messages"][-1].content
+            html_code = self._parse_response(html_content, "```html", request)
+        return html_code
+
+
+    def _write_html(self, html_code, output_file_name):
         try:
             with open(output_file_name, "w", encoding="utf-8") as file:
                 file.write(html_code)
@@ -476,10 +530,16 @@ class MultiAgentTripPlanner:
 app = FastAPI()
 @app.post("/trip", response_model=TripPlan)
 async def read_root(request: TripRequest):
+    print(f"开始为您规划，用时大约 10 分钟")
+
+    start_time = datetime.now()
     tools = await get_tools()
     multi_agent_trip_planner = MultiAgentTripPlanner(tools)
     trip_plan = await multi_agent_trip_planner.plan_trip(request)
     print(trip_plan)
+    end_time = datetime.now()
+    minutes = (end_time - start_time).total_seconds() / 60
+    print(f'用时 {minutes:.4f} 分钟')
     # trip_plan = TripPlan(
     #     city="杭州",
     #     start_date="2026-01-01",

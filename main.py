@@ -187,18 +187,22 @@ class MultiAgentTripPlanner:
                     break
             assert hotel_response != [], f"酒店搜索结果:[]，没有搜索到酒店结果"
 
-            # # 步骤4: 美食推荐Agent搜索美食
-            # print("🏨 步骤4: 搜索美食...")
-            # meal_query = f"帮我搜索{request.city}的{request.accommodation}美食。"
-            # meal_response = await self. meal_agent.ainvoke(
-            #     {"messages": [{'role': 'user', 'content': meal_query}]})
-            # meal_response_messages = meal_response["messages"]
-            # meal_response = parse_meal_data(meal_response_messages)
-            # print(f"美食搜索结果: {meal_response}...\n")
+            # 步骤4: 美食推荐Agent搜索美食
+            print("🏨 步骤4: 搜索美食...")
+            # meal_query = (f"帮我搜索{request.city}的美食，并推荐每一个景点附近一公里内的3个美食地点，"
+            #               f"景点的经纬度列表如下:[{[attraction.location for attraction in attraction_response]}]")
+            # meal_query = f"帮我搜索{request.city}分别适合在早、中、晚三餐吃的美食，要有{request.travel_days}天的美食内容"
+            meal_query = f"帮我搜索{request.city}的特色美食，并按照早中晚三餐进行安排{request.travel_days}天的餐饮情况，提供给我最终美食地点的详细信息"
+            meal_response = await self.meal_agent.ainvoke(
+                {"messages": [{'role': 'user', 'content': meal_query}]})
+            meal_response_messages = meal_response["messages"]
+            meal_response = parse_meal_data(meal_response_messages)
+            assert meal_response != [], f"美食搜索结果:[]，没有搜索到美食结果"
+            print(f"美食搜索结果: {meal_response}...\n")
 
             # 步骤5: 行程规划Agent整合信息生成计划
             print("📋 步骤5: 生成行程计划...")
-            trip_plan = self._build_trip_plan(request, attraction_response, weather_response, hotel_response)
+            trip_plan = self._build_trip_plan(request, attraction_response, weather_response, hotel_response, meal_response)
 
             # 解析最终计划
             print("📲 步骤6: 生成html代码...")
@@ -333,7 +337,7 @@ class MultiAgentTripPlanner:
         return hotel_response
 
     @staticmethod
-    def _build_planner_query(request, attraction_response, weather_response, hotel_response):
+    def _build_planner_query(request, attraction_response, weather_response, hotel_response, meal_response):
         query = f"""
 请根据以下信息生成{request.city}的{request.travel_days}天计划
 
@@ -353,6 +357,9 @@ class MultiAgentTripPlanner:
 
 **酒店信息:**
 {hotel_response}
+
+**美食信息:**
+{meal_response}
 
 请生成详细的旅行计划,包括每天的景点安排、餐饮推荐、住宿信息、天气情况和预算明细，必须按照上述信息生成，不能随意捏造数据！！！。
 """
@@ -479,12 +486,12 @@ class MultiAgentTripPlanner:
             print(f"⚠️  解析响应失败: {str(e)}")
             raise ValueError(f"解析响应时发生错误: {str(e)}")
 
-    def _build_trip_plan(self, request, attraction_response, weather_response, hotel_response) -> str:
+    def _build_trip_plan(self, request, attraction_response, weather_response, hotel_response, meal_response) -> str:
         planner_query = self._build_planner_query(request,
                                                   attraction_response,
                                                   weather_response,
                                                   hotel_response,
-                                                  )
+                                                  meal_response)
         print(f"{'=' * 60}")
         print(f"✅ 汇总信息: {planner_query}\n")
         print(f"{'=' * 60}\n")

@@ -205,19 +205,19 @@ class MultiAgentTripPlanner:
             trip_plan = self._build_trip_plan(request, attraction_response, weather_response, hotel_response, meal_response)
 
             # 解析最终计划
-            print("📲 步骤6: 生成html代码...")
-            html_code = self._build_html_code(f"```json\n{trip_plan}\n```", request)
-            output_file_name = f"{request.city}旅行手册.html"
-            self._write_html(html_code, output_file_name)
+            # print("📲 步骤6: 生成html代码...")
+            # html_code = self._build_html_code(f"```json\n{trip_plan}\n```", request)
+            # output_file_name = f"{request.city}旅行手册.html"
+            # self._write_html(html_code, output_file_name)
 
-            print("✅ 步骤7: 制作精美手册...")
-            async with async_playwright() as p:
-                browser = await p.chromium.launch()
-                page = await browser.new_page(viewport={'width': 1280, 'height': 800})
-                file_path = os.path.abspath(output_file_name)
-                await page.goto(f'file:{file_path}')  # 或 http://...
-                await page.screenshot(path=file_path.replace("html", "png"), full_page=True)  # full_page=True 自动滚到到底
-                await browser.close()
+            # print("✅ 步骤7: 制作精美手册...")
+            # async with async_playwright() as p:
+            #     browser = await p.chromium.launch()
+            #     page = await browser.new_page(viewport={'width': 1280, 'height': 800})
+            #     file_path = os.path.abspath(output_file_name)
+            #     await page.goto(f'file:{file_path}')  # 或 http://...
+            #     await page.screenshot(path=file_path.replace("html", "png"), full_page=True)  # full_page=True 自动滚到到底
+            #     await browser.close()
 
             print(f"{'='*60}")
             print(f"✅ 旅行计划生成完成!")

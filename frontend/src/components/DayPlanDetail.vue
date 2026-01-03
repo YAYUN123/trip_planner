@@ -5,8 +5,8 @@
         <a-descriptions-item label="日期">{{ dayPlan.date }}</a-descriptions-item>
         <a-descriptions-item label="交通方式">{{ dayPlan.transportation }}</a-descriptions-item>
         <a-descriptions-item label="住宿类型">{{ dayPlan.accommodation }}</a-descriptions-item>
-        <a-descriptions-item label="住宿酒店" v-if="dayPlan.hotel">
-          {{ dayPlan.hotel.name }}
+        <a-descriptions-item label="住宿酒店" v-if="hotelsList.length > 0">
+          {{ hotelsList.length === 1 ? hotelsList[0].name : `${hotelsList.length} 家酒店可选` }}
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
@@ -36,40 +36,91 @@
     </a-card>
 
     <!-- 酒店信息 -->
-    <a-card v-if="dayPlan.hotel" title="🏨 住宿信息" :bordered="false" class="hotel-card">
-      <a-descriptions :column="2" size="small">
-        <a-descriptions-item label="酒店名称">
-          {{ dayPlan.hotel.name || '未命名酒店' }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="dayPlan.hotel.type" label="酒店类型">
-          {{ dayPlan.hotel.type }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="dayPlan.hotel.address" label="地址" :span="2">
-          {{ dayPlan.hotel.address }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="dayPlan.hotel.price_range" label="价格范围">
-          {{ dayPlan.hotel.price_range }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="dayPlan.hotel.rating" label="评分">
-          {{ dayPlan.hotel.rating }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="dayPlan.hotel.estimated_cost !== undefined && dayPlan.hotel.estimated_cost !== null" label="预估费用">
-          ¥{{ formatPrice(dayPlan.hotel.estimated_cost) }} / 晚
-        </a-descriptions-item>
-      </a-descriptions>
-      <div v-if="dayPlan.hotel.location && dayPlan.hotel.location.longitude && dayPlan.hotel.location.latitude" class="map-section">
-        <AmapView
-          :center="dayPlan.hotel.location"
-          :markers="[
-            {
-              location: dayPlan.hotel.location,
-              title: dayPlan.hotel.name || '酒店',
-              content: `<div style="padding: 8px;"><h4>${dayPlan.hotel.name || '酒店'}</h4><p>${dayPlan.hotel.address || ''}</p></div>`
-            }
-          ]"
-          height="300px"
-        />
-      </div>
+    <a-card v-if="hotelsList.length > 0" title="🏨 住宿信息" :bordered="false" class="hotel-card">
+      <a-list
+        v-if="hotelsList.length > 1"
+        :data-source="hotelsList"
+        :grid="{ gutter: 16, xs: 1, sm: 1, md: 1 }"
+      >
+        <template #renderItem="{ item, index }">
+          <a-list-item>
+            <a-card class="hotel-item-card" :bordered="false">
+              <div class="hotel-item-header">
+                <h3 class="hotel-item-title">
+                  {{ item.name || '未命名酒店' }}
+                  <span v-if="hotelsList.length > 1" class="hotel-index">（选项 {{ index + 1 }}）</span>
+                </h3>
+              </div>
+              <a-descriptions :column="2" size="small">
+                <a-descriptions-item v-if="item.type" label="酒店类型">
+                  {{ item.type }}
+                </a-descriptions-item>
+                <a-descriptions-item v-if="item.rating" label="评分">
+                  {{ item.rating }}
+                </a-descriptions-item>
+                <a-descriptions-item v-if="item.address" label="地址" :span="2">
+                  {{ item.address }}
+                </a-descriptions-item>
+                <a-descriptions-item v-if="item.price_range" label="价格范围">
+                  {{ item.price_range }}
+                </a-descriptions-item>
+                <a-descriptions-item v-if="item.estimated_cost !== undefined && item.estimated_cost !== null" label="预估费用">
+                  ¥{{ formatPrice(item.estimated_cost) }} / 晚
+                </a-descriptions-item>
+              </a-descriptions>
+              <div v-if="item.location && item.location.longitude && item.location.latitude" class="map-section">
+                <AmapView
+                  :center="item.location"
+                  :markers="[
+                    {
+                      location: item.location,
+                      title: item.name || '酒店',
+                      content: `<div style="padding: 8px;"><h4>${item.name || '酒店'}</h4><p>${item.address || ''}</p></div>`
+                    }
+                  ]"
+                  height="300px"
+                />
+              </div>
+            </a-card>
+          </a-list-item>
+        </template>
+      </a-list>
+      <!-- 单个酒店时使用原来的展示方式 -->
+      <template v-else>
+        <a-descriptions :column="2" size="small">
+          <a-descriptions-item label="酒店名称">
+            {{ hotelsList[0].name || '未命名酒店' }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="hotelsList[0].type" label="酒店类型">
+            {{ hotelsList[0].type }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="hotelsList[0].address" label="地址" :span="2">
+            {{ hotelsList[0].address }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="hotelsList[0].price_range" label="价格范围">
+            {{ hotelsList[0].price_range }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="hotelsList[0].rating" label="评分">
+            {{ hotelsList[0].rating }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="hotelsList[0].estimated_cost !== undefined && hotelsList[0].estimated_cost !== null" label="预估费用">
+            ¥{{ formatPrice(hotelsList[0].estimated_cost) }} / 晚
+          </a-descriptions-item>
+        </a-descriptions>
+        <div v-if="hotelsList[0].location && hotelsList[0].location.longitude && hotelsList[0].location.latitude" class="map-section">
+          <AmapView
+            :center="hotelsList[0].location"
+            :markers="[
+              {
+                location: hotelsList[0].location,
+                title: hotelsList[0].name || '酒店',
+                content: `<div style="padding: 8px;"><h4>${hotelsList[0].name || '酒店'}</h4><p>${hotelsList[0].address || ''}</p></div>`
+              }
+            ]"
+            height="300px"
+          />
+        </div>
+      </template>
     </a-card>
 
     <!-- 景点列表 -->
@@ -188,6 +239,17 @@ interface Props {
 const props = defineProps<Props>()
 
 const mealOrder = ['breakfast', 'lunch', 'dinner', 'snack']
+
+// 获取所有酒店信息（支持 hotels 数组和 hotel 单个对象）
+const hotelsList = computed(() => {
+  if (props.dayPlan.hotels && Array.isArray(props.dayPlan.hotels) && props.dayPlan.hotels.length > 0) {
+    return props.dayPlan.hotels
+  }
+  if (props.dayPlan.hotel) {
+    return [props.dayPlan.hotel]
+  }
+  return []
+})
 
 const sortedMeals = computed(() => {
   if (!props.dayPlan.meals || props.dayPlan.meals.length === 0) {
@@ -371,6 +433,32 @@ const handleImageError = (event: Event) => {
 
 .meal-icon {
   font-size: 20px;
+}
+
+.hotel-item-card {
+  margin-bottom: 16px;
+  border-radius: 8px;
+}
+
+.hotel-item-card:last-child {
+  margin-bottom: 0;
+}
+
+.hotel-item-header {
+  margin-bottom: 12px;
+}
+
+.hotel-item-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.hotel-index {
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: normal;
 }
 
 :deep(.ant-descriptions-item-label) {

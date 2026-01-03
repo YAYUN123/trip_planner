@@ -79,20 +79,43 @@
           </a-card>
 
           <!-- 住宿信息卡片 -->
-          <a-card v-if="firstHotel" class="info-card hotel-card" :bordered="false">
+          <a-card v-if="allHotels.length > 0" class="info-card hotel-card" :bordered="false">
             <template #title>
               <span class="card-icon">🏨</span>
               住宿信息
+              <span v-if="allHotels.length > 1" class="hotel-count">（{{ allHotels.length }} 家）</span>
             </template>
-            <div class="hotel-info">
-              <h3 class="hotel-name">{{ firstHotel.name }}</h3>
-              <p class="hotel-address">{{ firstHotel.address }}</p>
+            <div v-if="allHotels.length === 1" class="hotel-info">
+              <h3 class="hotel-name">{{ allHotels[0].name }}</h3>
+              <p class="hotel-address">{{ allHotels[0].address }}</p>
               <div class="hotel-details">
-                <span v-if="firstHotel.rating" class="hotel-rating">评分: {{ firstHotel.rating }}</span>
-                <span v-if="firstHotel.price_range" class="hotel-price">价格区间: {{ firstHotel.price_range }}</span>
+                <span v-if="allHotels[0].rating" class="hotel-rating">评分: {{ allHotels[0].rating }}</span>
+                <span v-if="allHotels[0].price_range" class="hotel-price">价格区间: {{ allHotels[0].price_range }}</span>
               </div>
-              <p v-if="firstHotel.description" class="hotel-desc">{{ firstHotel.description }}</p>
+              <p v-if="allHotels[0].description" class="hotel-desc">{{ allHotels[0].description }}</p>
             </div>
+            <a-list
+              v-else
+              :data-source="allHotels"
+              :grid="{ gutter: 16, xs: 1, sm: 1, md: 1 }"
+            >
+              <template #renderItem="{ item, index }">
+                <a-list-item>
+                  <div class="hotel-info">
+                    <h3 class="hotel-name">
+                      {{ item.name }}
+                      <span class="hotel-index">（选项 {{ index + 1 }}）</span>
+                    </h3>
+                    <p class="hotel-address">{{ item.address }}</p>
+                    <div class="hotel-details">
+                      <span v-if="item.rating" class="hotel-rating">评分: {{ item.rating }}</span>
+                      <span v-if="item.price_range" class="hotel-price">价格区间: {{ item.price_range }}</span>
+                    </div>
+                    <p v-if="item.description" class="hotel-desc">{{ item.description }}</p>
+                  </div>
+                </a-list-item>
+              </template>
+            </a-list>
           </a-card>
         </div>
 
@@ -290,7 +313,14 @@ const mapCenter = computed<Location>(() => {
         locations.push(meal.location)
       }
     })
-    if (day.hotel?.location) {
+    // 处理酒店位置（支持多个酒店）
+    if (day.hotels && Array.isArray(day.hotels)) {
+      day.hotels.forEach((hotel) => {
+        if (hotel.location) {
+          locations.push(hotel.location)
+        }
+      })
+    } else if (day.hotel?.location) {
       locations.push(day.hotel.location)
     }
   })
@@ -339,17 +369,27 @@ const allMarkers = computed(() => {
 
     // 餐饮标记
     day.meals?.forEach((meal) => {
-      if (meal.location) {
+      if (meal.location && meal.location.longitude && meal.location.latitude) {
         const mealTypeName = getMealTypeName(meal.type)
+        const mealName = meal.name || '未命名餐厅'
+        const costText = meal.estimated_cost && meal.estimated_cost > 0 
+          ? `<p style="margin: 0 0 4px 0; color: #ff4d4f; font-size: 12px; font-weight: 500;">💰 约¥${formatPrice(meal.estimated_cost)}</p>` 
+          : ''
+        const addressText = meal.address 
+          ? `<p style="margin: 0 0 4px 0; color: #8c8c8c; font-size: 12px;">📍 ${meal.address}</p>` 
+          : ''
         markers.push({
           location: meal.location,
-          title: meal.name,
-          label: meal.name,
+          title: mealName,
+          label: mealName,
           content: `
             <div style="padding: 8px; min-width: 200px;">
-              <h4 style="margin: 0 0 8px 0; color: #52c41a;">🍽️ ${meal.name}</h4>
-              <p style="margin: 0 0 4px 0; color: #8c8c8c; font-size: 12px;">${mealTypeName}</p>
-              <p style="margin: 0 0 4px 0; color: #8c8c8c; font-size: 12px;">${meal.address || ''}</p>
+              <h4 style="margin: 0 0 8px 0; color: #52c41a; font-weight: 600;">🍽️ ${mealName}</h4>
+              <p style="margin: 0 0 4px 0; color: #8c8c8c; font-size: 12px;">
+                <span style="background: #52c41a; color: white; padding: 2px 6px; border-radius: 3px; font-size: 11px;">${mealTypeName}</span>
+              </p>
+              ${addressText}
+              ${costText}
               <p style="margin: 0; color: #595959; font-size: 12px;">第${dayIndex + 1}天</p>
             </div>
           `,
@@ -358,8 +398,26 @@ const allMarkers = computed(() => {
       }
     })
 
-    // 酒店标记
-    if (day.hotel?.location) {
+    // 酒店标记（支持多个酒店）
+    if (day.hotels && Array.isArray(day.hotels)) {
+      day.hotels.forEach((hotel) => {
+        if (hotel.location) {
+          markers.push({
+            location: hotel.location,
+            title: hotel.name,
+            label: hotel.name,
+            content: `
+              <div style="padding: 8px; min-width: 200px;">
+                <h4 style="margin: 0 0 8px 0; color: #722ed1;">🏨 ${hotel.name}</h4>
+                <p style="margin: 0 0 4px 0; color: #8c8c8c; font-size: 12px;">${hotel.address || ''}</p>
+                <p style="margin: 0; color: #595959; font-size: 12px;">第${dayIndex + 1}天</p>
+              </div>
+            `,
+            type: 'hotel'
+          })
+        }
+      })
+    } else if (day.hotel?.location) {
       markers.push({
         location: day.hotel.location,
         title: day.hotel.name,
@@ -379,15 +437,20 @@ const allMarkers = computed(() => {
   return markers
 })
 
-// 获取第一个酒店信息
-const firstHotel = computed(() => {
-  if (!tripPlan.value) return null
+// 获取所有酒店信息
+const allHotels = computed(() => {
+  if (!tripPlan.value) return []
+  const hotels: Hotel[] = []
   for (const day of tripPlan.value.days) {
-    if (day.hotel) {
-      return day.hotel
+    // 优先使用 hotels 数组
+    if (day.hotels && Array.isArray(day.hotels) && day.hotels.length > 0) {
+      hotels.push(...day.hotels)
+    } else if (day.hotel) {
+      // 向后兼容：单个 hotel
+      hotels.push(day.hotel)
     }
   }
-  return null
+  return hotels
 })
 
 // 格式化日期
@@ -693,6 +756,19 @@ onMounted(() => {
   font-weight: 600;
   margin: 0;
   color: #333;
+}
+
+.hotel-index {
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: normal;
+}
+
+.hotel-count {
+  font-size: 14px;
+  color: #8c8c8c;
+  font-weight: normal;
+  margin-left: 8px;
 }
 
 .hotel-address {

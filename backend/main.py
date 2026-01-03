@@ -144,7 +144,7 @@ class MultiAgentTripPlanner:
             for i in range(retry_number):
                 attraction_response = await self._get_attraction_response(request)
                 if attraction_response:
-                    print(f"搜索景点在第{i}次成功。。。。。。。。。。。。。。。")
+                    print(f"搜索景点在第{i+1}次成功。。。。。。。。。。。。。。。")
                     break
             assert attraction_response != [], f"景点搜索结果:[]，没有搜索到景点结果"
 
@@ -154,7 +154,7 @@ class MultiAgentTripPlanner:
             for i in range(retry_number):
                 weather_response = await self._get_weather_response(request)
                 if weather_response:
-                    print(f"查询天气在第{i}次成功。。。。。。。。。。。。。。。")
+                    print(f"查询天气在第{i+1}次成功。。。。。。。。。。。。。。。")
                     break
             assert weather_response != [], f"天气搜索结果:[]，没有搜索到天气结果"
 
@@ -183,7 +183,7 @@ class MultiAgentTripPlanner:
             for i in range(retry_number):
                 hotel_response = await self._get_hotel_response(request, central_attraction_names)
                 if hotel_response:
-                    print(f"搜索酒店在第{i}次成功。。。。。。。。。。。。。。。")
+                    print(f"搜索酒店在第{i+1}次成功。。。。。。。。。。。。。。。")
                     break
             assert hotel_response != [], f"酒店搜索结果:[]，没有搜索到酒店结果"
 

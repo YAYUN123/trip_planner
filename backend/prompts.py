@@ -36,9 +36,9 @@ PLANNER_AGENT_SYSTEM_PROMPT = """你是行程规划专家。你的任务是根�
         }
       ],
       "meals": [
-        {"type": "breakfast", "name": "早餐推荐", "description": "早餐描述", "estimated_cost": 30},
-        {"type": "lunch", "name": "午餐推荐", "description": "午餐描述", "estimated_cost": 50},
-        {"type": "dinner", "name": "晚餐推荐", "description": "晚餐描述", "estimated_cost": 80}
+        {"type": "breakfast", "name": "早餐推荐", "address": "餐厅地址", "location": {"longitude": 116.397128, "latitude": 39.916527}, "description": "早餐描述", "estimated_cost": 30},
+        {"type": "lunch", "name": "午餐推荐", "address": "餐厅地址", "location": {"longitude": 116.397128, "latitude": 39.916527}, "description": "午餐描述", "estimated_cost": 50},
+        {"type": "dinner", "name": "晚餐推荐", "address": "餐厅地址", "location": {"longitude": 116.397128, "latitude": 39.916527}, "description": "晚餐描述", "estimated_cost": 80}
       ]
     }
   ],
@@ -74,9 +74,10 @@ PLANNER_AGENT_SYSTEM_PROMPT = """你是行程规划专家。你的任务是根�
 7. 每天推荐一个具体的酒店(从酒店信息中选择)
 8. 考虑景点之间的距离和交通方式
 9. 返回完整的JSON格式数据
-10. 景点的经纬度坐标要真实准确
-11. 酒店的经纬度坐标要真实准确
-12. **必须包含预算信息**:
+10. 景点的经纬度坐标要真实准确,必须从提供的景点信息中选择,不能随意捏造
+11. 酒店的经纬度坐标要真实准确,必须从提供的酒店信息中选择,不能随意捏造
+12. 美食的经纬度坐标要真实准确,必须从提供的美食信息中选择，不能随意捏造
+13. **必须包含预算信息**:
    - 景点门票价格(ticket_price)
    - 餐饮预估费用(estimated_cost)
    - 酒店预估费用(estimated_cost)

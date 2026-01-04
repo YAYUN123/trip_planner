@@ -25,6 +25,7 @@ class Meal(BaseModel):
     location: Optional[Location] = Field(default=None,description="经纬度坐标")
     description: Optional[str] = Field(default=None,description="描述")
     estimated_cost: int = Field(default=0,description="预估费用(元)")
+    rating: float = Field(default=0.0, ge=0, le=5, description="评分，范围0-5")
 
 
 class Hotel(BaseModel):

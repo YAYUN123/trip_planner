@@ -55,7 +55,8 @@ export interface DayPlan {
   description: string
   transportation: string
   accommodation: string
-  hotel?: Hotel
+  hotel?: Hotel  // 向后兼容：单个酒店
+  hotels?: Hotel[]  // 支持多个酒店
   attractions: Attraction[]
   meals: Meal[]
 }

@@ -287,7 +287,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, FileTextOutlined } from '@ant-design/icons-vue'
-import type { TripPlan, Location, Attraction, Meal, Hotel } from '@/types'
+import type { TripPlan, Location, Meal, Hotel } from '@/types'
 import AmapView from '@/components/AmapView.vue'
 
 const router = useRouter()

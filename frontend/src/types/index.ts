@@ -37,6 +37,7 @@ export interface Hotel {
   distance: string
   type: string
   estimated_cost: number
+  description?: string
 }
 
 // 预算信息

@@ -6,7 +6,7 @@
         <a-descriptions-item label="交通方式">{{ dayPlan.transportation }}</a-descriptions-item>
         <a-descriptions-item label="住宿类型">{{ dayPlan.accommodation }}</a-descriptions-item>
         <a-descriptions-item label="住宿酒店" v-if="hotelsList.length > 0">
-          {{ hotelsList.length === 1 ? hotelsList[0].name : `${hotelsList.length} 家酒店可选` }}
+          {{ hotelsList.length === 1 ? hotelsList[0].name : hotelsList.length + ' 家酒店可选' }}
         </a-descriptions-item>
       </a-descriptions>
     </a-card>
@@ -71,13 +71,7 @@
               <div v-if="item.location && item.location.longitude && item.location.latitude" class="map-section">
                 <AmapView
                   :center="item.location"
-                  :markers="[
-                    {
-                      location: item.location,
-                      title: item.name || '酒店',
-                      content: `<div style="padding: 8px;"><h4>${item.name || '酒店'}</h4><p>${item.address || ''}</p></div>`
-                    }
-                  ]"
+                  :markers="getHotelMarkers(item)"
                   height="300px"
                 />
               </div>
@@ -110,13 +104,7 @@
         <div v-if="hotelsList[0].location && hotelsList[0].location.longitude && hotelsList[0].location.latitude" class="map-section">
           <AmapView
             :center="hotelsList[0].location"
-            :markers="[
-              {
-                location: hotelsList[0].location,
-                title: hotelsList[0].name || '酒店',
-                content: `<div style="padding: 8px;"><h4>${hotelsList[0].name || '酒店'}</h4><p>${hotelsList[0].address || ''}</p></div>`
-              }
-            ]"
+            :markers="getHotelMarkers(hotelsList[0])"
             height="300px"
           />
         </div>
@@ -167,13 +155,7 @@
               <div v-if="item.location && item.location.longitude && item.location.latitude" class="attraction-map">
                 <AmapView
                   :center="item.location"
-                  :markers="[
-                    {
-                      location: item.location,
-                      title: item.name || '景点',
-                      content: `<div style="padding: 8px;"><h4>${item.name || '景点'}</h4><p>${item.address || ''}</p></div>`
-                    }
-                  ]"
+                  :markers="getAttractionMarkers(item)"
                   height="200px"
                 />
               </div>
@@ -209,13 +191,7 @@
             <div v-if="meal.location && meal.location.longitude && meal.location.latitude" class="meal-map">
               <AmapView
                 :center="meal.location"
-                :markers="[
-                  {
-                    location: meal.location,
-                    title: meal.name || '餐厅',
-                    content: `<div style="padding: 8px;"><h4>${meal.name || '餐厅'}</h4><p>${meal.address || ''}</p></div>`
-                  }
-                ]"
+                :markers="getMealMarkers(meal)"
                 height="200px"
               />
             </div>
@@ -310,6 +286,39 @@ const formatRating = (rating: number): string => {
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement
   img.style.display = 'none'
+}
+
+// 生成酒店标记点
+const getHotelMarkers = (hotel: any) => {
+  return [
+    {
+      location: hotel.location,
+      title: hotel.name || '酒店',
+      content: `<div style="padding: 8px;"><h4>${hotel.name || '酒店'}</h4><p>${hotel.address || ''}</p></div>`
+    }
+  ]
+}
+
+// 生成景点标记点
+const getAttractionMarkers = (attraction: any) => {
+  return [
+    {
+      location: attraction.location,
+      title: attraction.name || '景点',
+      content: `<div style="padding: 8px;"><h4>${attraction.name || '景点'}</h4><p>${attraction.address || ''}</p></div>`
+    }
+  ]
+}
+
+// 生成餐饮标记点
+const getMealMarkers = (meal: any) => {
+  return [
+    {
+      location: meal.location,
+      title: meal.name || '餐厅',
+      content: `<div style="padding: 8px;"><h4>${meal.name || '餐厅'}</h4><p>${meal.address || ''}</p></div>`
+    }
+  ]
 }
 </script>
 

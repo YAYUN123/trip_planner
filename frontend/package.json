@@ -14,7 +14,8 @@
     "ant-design-vue": "^4.1.2",
     "@ant-design/icons-vue": "^7.0.1",
     "@amap/amap-jsapi-loader": "^1.0.1",
-    "dayjs": "^1.11.10"
+    "dayjs": "^1.11.10",
+    "html2canvas": "^1.4.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",

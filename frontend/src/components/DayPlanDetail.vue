@@ -204,7 +204,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { DayPlan, Meal, WeatherInfo } from '@/types'
+import type { DayPlan, WeatherInfo } from '@/types'
 import AmapView from './AmapView.vue'
 
 interface Props {
